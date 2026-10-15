@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Crop Recommendation Result - Agronomic profile, optimal nutrient requirements, irrigation schedule and management guidelines.">
+    <title>Recommendation Result: {{ result.crop_info.display_name }} | Crop Recommendation System</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar" id="top-nav">
+        <div class="container nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <span class="brand-icon">🌱</span>
+                <span>Agri<span class="brand-highlight">Predict</span> ML</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-link">← New Prediction</a>
+                <a href="{{ url_for('index') }}#crop-library" class="nav-link">Crop Library</a>
+                <button onclick="window.print()" class="btn-secondary-sm">
+                    <span>🖨️</span> Print Report
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container result-wrapper">
+        
+        <!-- Primary Recommended Crop Hero Banner -->
+        <section class="result-hero-card">
+            <div class="result-crop-icon">{{ result.crop_info.icon }}</div>
+            
+            <div class="result-tagline-badge">
+                <span>✨ Top Recommended Crop</span>
+            </div>
+            
+            <h1 class="result-crop-name">{{ result.crop_info.display_name }}</h1>
+            <div class="result-scientific-name">Scientific Name: {{ result.crop_info.scientific_name }}</div>
+            
+            <div class="result-meta-row">
+                <div class="result-meta-chip">
+                    <span>🏷️</span>
+                    <span>Category: <strong>{{ result.crop_info.category }}</strong></span>
+                </div>
+                <div class="result-meta-chip result-confidence-pill">
+                    <span>🎯</span>
+                    <span>ML Confidence: <strong>{{ result.confidence }}%</strong></span>
+                </div>
+                <div class="result-meta-chip">
+                    <span>🗓️</span>
+                    <span>Growth Cycle: <strong>{{ result.crop_info.growth_duration }}</strong></span>
+                </div>
+            </div>
+            
+            <p class="result-summary-text">
+                {{ result.crop_info.description }}
+            </p>
+        </section>
+
+        <!-- Detailed Agronomic Guidance Cards Grid -->
+        <section class="detail-cards-grid">
+            <!-- Soil Requirements -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="info-card-icon">🌱</span>
+                    <h3 class="info-card-title">Soil & Land Requirements</h3>
+                </div>
+                <div class="info-card-body">
+                    {{ result.crop_info.soil_type }}
+                </div>
+            </div>
+
+            <!-- Season & Crop Duration -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="info-card-icon">📅</span>
+                    <h3 class="info-card-title">Season & Timing</h3>
+                </div>
+                <div class="info-card-body">
+                    <strong>Optimal Season:</strong> {{ result.crop_info.season }}<br>
+                    <strong>Maturity Period:</strong> {{ result.crop_info.growth_duration }}
+                </div>
+            </div>
+
+            <!-- Irrigation & Water Management -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="info-card-icon">💧</span>
+                    <h3 class="info-card-title">Irrigation Management</h3>
+                </div>
+                <div class="info-card-body">
+                    {{ result.crop_info.irrigation_tips }}
+                </div>
+            </div>
+
+            <!-- Fertilizer & Nutrient Tips -->
+            <div class="info-card">
+                <div class="info-card-header">
+                    <span class="info-card-icon">🧪</span>
+                    <h3 class="info-card-title">Nutrient & Fertilizer Strategy</h3>
+                </div>
+                <div class="info-card-body">
+                    {{ result.crop_info.fertilizer_tips }}
+                </div>
+            </div>
+
+            <!-- Economic & Commercial Value -->
+            <div class="info-card" style="grid-column: 1 / -1;">
+                <div class="info-card-header">
+                    <span class="info-card-icon">💰</span>
+                    <h3 class="info-card-title">Economic Outlook & Market Viability</h3>
+                </div>
+                <div class="info-card-body">
+                    {{ result.crop_info.economic_value }}
+                </div>
+            </div>
+        </section>
+
+        <!-- Parameter Fit & Benchmark Comparison (3x3 Layout [ . . . , . . . , . . . ]) -->
+        <section class="param-table-card">
+            <h2 class="section-title-sm">
+                <span>📊</span> Soil & Climate Parameter Compatibility Analysis
+            </h2>
+            <p class="section-subtitle-sm">
+                Comparison of your field inputs against optimal standard benchmarks for {{ result.crop_info.display_name }}:
+            </p>
+
+            <div class="comparison-grid">
+                {% for p in result.param_analysis %}
+                <div class="comp-box">
+                    <div class="comp-box-top">
+                        <span class="comp-box-title">{{ p.name }}</span>
+                        <span class="{{ p.badge_class }}">{{ p.status }}</span>
+                    </div>
+                    <div class="comp-values">
+                        <span>Your Input: <strong class="comp-val-bold">{{ p.user_val }} {{ p.unit }}</strong></span>
+                        <span>Ideal Avg: <strong>{{ p.ideal_val }} {{ p.unit }}</strong></span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Alternative Recommendations (if any) -->
+        {% if result.alternatives %}
+        <section class="alternatives-card">
+            <h2 class="section-title-sm">
+                <span>🔄</span> Secondary Viable Alternative Crops
+            </h2>
+            <p class="section-subtitle-sm">
+                Other crops showing high mathematical compatibility with your current soil profile:
+            </p>
+
+            <div class="alt-grid">
+                {% for alt in result.alternatives %}
+                <div class="alt-box">
+                    <span class="alt-icon">{{ alt.icon }}</span>
+                    <div style="flex: 1;">
+                        <div class="alt-title">{{ alt.name }}</div>
+                        <div class="alt-category">{{ alt.category }} • {{ alt.probability }}% Match</div>
+                        <div class="alt-prob-bar">
+                            <div class="alt-prob-fill" data-width="{{ alt.probability }}"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Bottom Action Row -->
+        <div class="result-actions">
+            <a href="{{ url_for('index') }}" class="btn-predict" style="text-decoration: none;">
+                <span>🌱 Test Another Condition</span>
+            </a>
+            <button onclick="window.print()" class="btn-secondary">
+                <span>🖨️ Print / Save Report (PDF)</span>
+            </button>
+            <a href="{{ url_for('index') }}#crop-library" class="btn-secondary">
+                <span>📚 Explore All Crops</span>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Updated Rich Footer Section -->
+    <footer class="footer">
+        <div class="container footer-rich-content">
+            <div class="footer-top-brand">
+                <div class="footer-brand-title">🌱 SMART CROP RECOMMENDATION SYSTEM</div>
+                <div class="footer-tagline">Intelligence for Agriculture. Insights for Better Farming.</div>
+                <p class="footer-subtext">
+                    Empowering smarter agricultural decisions through Machine Learning, soil analysis, and climate-based crop prediction.
+                </p>
+            </div>
+
+            <div class="footer-grid-info">
+                <div class="footer-info-col">
+                    <div class="footer-col-heading">POWERED BY</div>
+                    <div class="footer-col-text">Python • Flask • Scikit-learn • HTML5 • CSS3</div>
+                </div>
+                <div class="footer-info-col">
+                    <div class="footer-col-heading">OUR MISSION</div>
+                    <div class="footer-col-text">
+                        Promoting data-driven crop selection, efficient resource utilization, and sustainable agricultural practices through intelligent technology.
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-motto-bar">
+                Smart Technology | Precision Agriculture | Sustainable Future
+            </div>
+
+            <div class="footer-bottom-copy">
+                <div>© 2027 Smart Crop Recommendation System. All Rights Reserved.</div>
+                <div class="footer-academic-note">Developed as an academic project in Machine Learning and Web Development.</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.alt-prob-fill[data-width]').forEach(function(el) {
+                el.style.width = el.getAttribute('data-width') + '%';
+            });
+        });
+    </script>
+</body>
+</html>

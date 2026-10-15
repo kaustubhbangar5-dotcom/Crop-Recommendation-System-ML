@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-Powered Crop Recommendation System using Machine Learning. Accurately predicts suitable crops based on soil nutrients and climatic conditions.">
+    <meta name="keywords" content="Crop Recommendation, Machine Learning, Agriculture AI, Smart Farming, Soil NPK, Flask, Scikit-learn">
+    <title>Smart Crop Recommendation System | Precision Agriculture AI</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar" id="top-nav">
+        <div class="container nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <span class="brand-icon">🌱</span>
+                <span>Agri<span class="brand-highlight">Predict</span> ML</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="#recommendation-form" class="nav-link">Predict Crop</a>
+                <a href="#crop-library" class="nav-link">Crop Library</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Flash Messages for Validation Errors -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>⚠️</span>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h1 class="hero-title">
+                Smart <span class="gradient-text">Crop Recommendation</span> System
+            </h1>
+            <p class="hero-description">
+                Make smarter farming decisions with Machine Learning. Analyze soil nutrients and climatic conditions to discover suitable crops for your land and support sustainable agriculture.
+            </p>
+        </section>
+
+        <!-- Quick Presets Bar (10 Scenarios: [5, 5]) -->
+        <section class="presets-card">
+            <div class="presets-header">
+                <div class="presets-title">
+                    <span>⚡</span>
+                    <span>Quick Test Scenarios</span>
+                </div>
+            </div>
+            
+            <div class="presets-grid">
+                {% for preset in presets %}
+                <button type="button" class="preset-btn" 
+                        data-n="{{ preset.N }}" 
+                        data-p="{{ preset.P }}" 
+                        data-k="{{ preset.K }}" 
+                        data-temp="{{ preset.temp }}" 
+                        data-humidity="{{ preset.humidity }}" 
+                        data-ph="{{ preset.ph }}" 
+                        data-rainfall="{{ preset.rainfall }}"
+                        data-moisture="{{ preset.moisture }}"
+                        data-sunlight="{{ preset.sunlight }}">
+                    <div class="preset-name-wrap">
+                        <span class="preset-icon">{{ preset.icon }}</span>
+                        <span>{{ preset.name }}</span>
+                    </div>
+                    <span class="preset-badge">{{ preset.badge }}</span>
+                </button>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Crop Recommendation Form (9 Features) -->
+        <section class="form-container" id="recommendation-form">
+            <form action="{{ url_for('predict') }}" method="POST" id="cropForm">
+                <div class="form-header-bar">
+                    <h2 class="form-section-title">
+                        <span>🧪</span>
+                        <span>Soil & Environmental Input Parameters</span>
+                    </h2>
+                    <div class="form-actions-quick">
+                        <button type="button" class="btn-secondary-sm" id="btn-randomize">
+                            <span>🎲</span> Randomize
+                        </button>
+                        <button type="button" class="btn-secondary-sm" id="btn-reset">
+                            <span>🔄</span> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Parameters Grid (3x3 Layout [ . . . , . . . , . . . ]) -->
+                <div class="parameters-grid">
+                    <!-- 1. Nitrogen (N) -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-n">🌱</div>
+                                <div>
+                                    <div class="param-title">Nitrogen (N)</div>
+                                    <div class="param-sub">Ratio in Soil</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">kg / ha</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="0" max="200" name="N" id="n_input" value="90" required class="form-control-num">
+                            </div>
+                            <input type="range" min="0" max="200" step="1" value="90" id="n_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>0 kg/ha</span>
+                                <span>Optimal: 20-140</span>
+                                <span>200 kg/ha</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Phosphorus (P) -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-p">🧪</div>
+                                <div>
+                                    <div class="param-title">Phosphorus (P)</div>
+                                    <div class="param-sub">Ratio in Soil</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">kg / ha</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="0" max="200" name="P" id="p_input" value="42" required class="form-control-num">
+                            </div>
+                            <input type="range" min="0" max="200" step="1" value="42" id="p_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>0 kg/ha</span>
+                                <span>Optimal: 10-145</span>
+                                <span>200 kg/ha</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Potassium (K) -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-k">💎</div>
+                                <div>
+                                    <div class="param-title">Potassium (K)</div>
+                                    <div class="param-sub">Ratio in Soil</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">kg / ha</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="0" max="250" name="K" id="k_input" value="43" required class="form-control-num">
+                            </div>
+                            <input type="range" min="0" max="250" step="1" value="43" id="k_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>0 kg/ha</span>
+                                <span>Optimal: 15-205</span>
+                                <span>250 kg/ha</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Temperature -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-temp">🌡️</div>
+                                <div>
+                                    <div class="param-title">Temperature</div>
+                                    <div class="param-sub">Ambient Air Temp</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">°C</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="0" max="55" name="temperature" id="temperature_input" value="20.9" required class="form-control-num">
+                            </div>
+                            <input type="range" min="5" max="50" step="0.5" value="20.9" id="temp_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>5 °C</span>
+                                <span>Optimal: 12-38 °C</span>
+                                <span>50 °C</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Humidity -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-humidity">💧</div>
+                                <div>
+                                    <div class="param-title">Humidity</div>
+                                    <div class="param-sub">Relative Humidity</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">%</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="5" max="100" name="humidity" id="humidity_input" value="82.0" required class="form-control-num">
+                            </div>
+                            <input type="range" min="10" max="100" step="1" value="82.0" id="humidity_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>10 %</span>
+                                <span>Average: 40-95 %</span>
+                                <span>100 %</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. Soil pH -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-ph">⚖️</div>
+                                <div>
+                                    <div class="param-title">Soil pH</div>
+                                    <div class="param-sub">Acidity / Alkalinity</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">pH Scale</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="0" max="14" name="ph" id="ph_input" value="6.5" required class="form-control-num">
+                            </div>
+                            <input type="range" min="3.5" max="9.9" step="0.1" value="6.5" id="ph_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>3.5 (Acidic)</span>
+                                <span>Neutral: 6.0 - 7.5</span>
+                                <span>9.9 (Alkaline)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Rainfall -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-rain">🌧️</div>
+                                <div>
+                                    <div class="param-title">Rainfall</div>
+                                    <div class="param-sub">Precipitation Rate</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">mm</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="0" max="500" name="rainfall" id="rainfall_input" value="202.9" required class="form-control-num">
+                            </div>
+                            <input type="range" min="20" max="300" step="1" value="202.9" id="rainfall_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>20 mm</span>
+                                <span>Average: 40-260 mm</span>
+                                <span>300 mm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. Soil Moisture -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-moist">🌊</div>
+                                <div>
+                                    <div class="param-title">Soil Moisture</div>
+                                    <div class="param-sub">Root Zone Content</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">%</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="5" max="100" name="soil_moisture" id="soil_moisture_input" value="85.0" required class="form-control-num">
+                            </div>
+                            <input type="range" min="10" max="95" step="1" value="85.0" id="soil_moisture_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>10 % (Dry)</span>
+                                <span>Average: 30-85 %</span>
+                                <span>95 % (Saturated)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. Sunlight Duration -->
+                    <div class="param-card">
+                        <div class="param-header">
+                            <div class="param-label-wrap">
+                                <div class="param-icon-box icon-sun">☀️</div>
+                                <div>
+                                    <div class="param-title">Sunlight Duration</div>
+                                    <div class="param-sub">Daily Photoperiod</div>
+                                </div>
+                            </div>
+                            <span class="param-unit-tag">hrs / day</span>
+                        </div>
+                        <div class="input-slider-group">
+                            <div class="input-num-wrapper">
+                                <input type="number" step="any" min="0" max="16" name="sunlight_hours" id="sunlight_hours_input" value="6.5" required class="form-control-num">
+                            </div>
+                            <input type="range" min="4" max="12" step="0.1" value="6.5" id="sunlight_hours_slider" class="range-slider">
+                            <div class="slider-limits">
+                                <span>4 hrs (Shade)</span>
+                                <span>Optimal: 6-10 hrs</span>
+                                <span>12 hrs (Sunny)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit & Action Row -->
+                <div class="form-submit-row">
+                    <button type="submit" class="btn-predict" id="btn-submit-predict">
+                        <span>🌾 Recommend Optimal Crop</span>
+                        <span class="btn-icon-right">➔</span>
+                    </button>
+                </div>
+
+                <!-- Live Dynamic Real-time Preview Drawer -->
+                <div class="live-preview-box" id="live-preview-box">
+                    <div class="live-preview-left">
+                        <span class="live-preview-icon" id="live-crop-icon">🌾</span>
+                        <div>
+                            <div class="live-preview-title">Real-Time ML Prediction Preview</div>
+                            <div class="live-preview-crop" id="live-crop-name">Rice</div>
+                        </div>
+                    </div>
+                    <div class="live-preview-conf" id="live-crop-conf">
+                        Confidence: 97.0%
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Crop Encyclopedia & Agronomy Knowledge Base (24 Classes) -->
+        <section class="library-section" id="crop-library">
+            <h2 class="form-section-title" style="margin-bottom: 0.5rem;">
+                <span>📚</span>
+                <span>Supported Agricultural Crops</span>
+            </h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                Click any crop card to inspect complete soil requirements, climate thresholds, and agronomic guidelines.
+            </p>
+
+            <div class="library-grid">
+                {% for key, c in crops.items() %}
+                <div class="crop-card-mini" data-crop="{{ key }}">
+                    <div class="crop-mini-top">
+                        <span class="crop-mini-icon">{{ c.icon }}</span>
+                        <div>
+                            <div class="crop-mini-name">{{ c.display_name }}</div>
+                            <div class="crop-mini-cat">{{ c.category }}</div>
+                        </div>
+                    </div>
+                    <div class="crop-mini-desc">{{ c.description }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Crop Details -->
+    <div class="modal-overlay" id="crop-modal">
+        <div class="modal-card">
+            <button class="modal-close" id="modal-close">✕</button>
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span id="modal-icon" style="font-size: 3.5rem;">🌱</span>
+                <h3 id="modal-name" style="font-size: 1.8rem; font-family: var(--font-display); color: #ffffff; margin-top: 0.5rem;">Crop Name</h3>
+                <div id="modal-sci" style="font-style: italic; color: var(--text-muted);">Scientific Name</div>
+                <div id="modal-cat" class="preset-badge" style="display: inline-block; margin-top: 0.5rem;">Category</div>
+            </div>
+
+            <p id="modal-desc" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.6;"></p>
+
+            <div style="display: grid; gap: 0.9rem; font-size: 0.9rem;">
+                <div class="comp-box">
+                    <strong style="color: var(--primary-300);">🌱 Ideal Soil:</strong>
+                    <div id="modal-soil" style="color: var(--text-main); margin-top: 0.2rem;"></div>
+                </div>
+                <div class="comp-box">
+                    <strong style="color: var(--sun-gold);">🗓️ Season & Duration:</strong>
+                    <div style="color: var(--text-main); margin-top: 0.2rem;">
+                        <span id="modal-season"></span> • <span id="modal-duration"></span>
+                    </div>
+                </div>
+                <div class="comp-box">
+                    <strong style="color: #38bdf8;">💧 Irrigation Tips:</strong>
+                    <div id="modal-irrigation" style="color: var(--text-main); margin-top: 0.2rem;"></div>
+                </div>
+                <div class="comp-box">
+                    <strong style="color: #4ade80;">🧪 Fertilizer Advice:</strong>
+                    <div id="modal-fertilizer" style="color: var(--text-main); margin-top: 0.2rem;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Updated Rich Footer Section -->
+    <footer class="footer">
+        <div class="container footer-rich-content">
+            <div class="footer-top-brand">
+                <div class="footer-brand-title">🌱 SMART CROP RECOMMENDATION SYSTEM</div>
+                <div class="footer-tagline">Intelligence for Agriculture. Insights for Better Farming.</div>
+                <p class="footer-subtext">
+                    Empowering smarter agricultural decisions through Machine Learning, soil analysis, and climate-based crop prediction.
+                </p>
+            </div>
+
+            <div class="footer-grid-info">
+                <div class="footer-info-col">
+                    <div class="footer-col-heading">POWERED BY</div>
+                    <div class="footer-col-text">Python • Flask • Scikit-learn • HTML5 • CSS3</div>
+                </div>
+                <div class="footer-info-col">
+                    <div class="footer-col-heading">OUR MISSION</div>
+                    <div class="footer-col-text">
+                        Promoting data-driven crop selection, efficient resource utilization, and sustainable agricultural practices through intelligent technology.
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-motto-bar">
+                Smart Technology | Precision Agriculture | Sustainable Future
+            </div>
+
+            <div class="footer-bottom-copy">
+                <div>© 2027 Smart Crop Recommendation System. All Rights Reserved.</div>
+                <div class="footer-academic-note">Developed as an academic project in Machine Learning and Web Development.</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Client Script -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
