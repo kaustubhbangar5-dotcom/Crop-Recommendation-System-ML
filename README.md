@@ -371,5 +371,5 @@ The **Smart Crop Recommendation System** demonstrates how machine learning can b
 
 <div align="center">
   <sub>Smart Technology | Precision Agriculture | Sustainable Future</sub><br>
-  <sub>© 2027 Smart Crop Recommendation System. All Rights Reserved.</sub>
+  <sub>© 2026 Smart Crop Recommendation System. All Rights Reserved.</sub>
 </div>
